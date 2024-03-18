@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, Pressable } from "react-native";
+import { StyleSheet, Text, Pressable } from "react-native";
 import { Link } from "expo-router";
 
 export default function ExerciseListItem({ item }) {

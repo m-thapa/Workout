@@ -36,13 +36,6 @@ export default function ExercisesScreen() {
   if (error) {
     return <Text>Failed to fetch exercises</Text>;
   }
-
-  // const exercise = data.exercise[0];
-
-  // if (!exercise) {
-  //   return <Text>Exercise Not Found</Text>;
-  // }
-
   return (
     <View style={styles.container}>
       <FlatList

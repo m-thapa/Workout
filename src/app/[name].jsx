@@ -1,11 +1,11 @@
-import { View, Text, StyleSheet, ScrollView } from "react-native";
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import { Stack } from "expo-router";
 import { useState } from "react";
 import { gql } from "graphql-request";
 import { useQuery } from "@tanstack/react-query";
 import graphqlClient from "../graphqlClient";
-import { ActivityIndicator } from "react-native-web";
+import NewSetInput from "../components/NewSetInput";
 
 const exerciseQuery = gql`
   query exercises($name: String) {
@@ -25,18 +25,18 @@ export default function ExerciseDetailsScreen() {
     queryFn: () => graphqlClient.request(exerciseQuery, { name }),
   });
 
+  
   const [isInstructionExpanded, setIsInstructionExpanded] = useState(false);
-
+  
   if (isLoading) {
     return <ActivityIndicator />;
   }
-
+  
   if (error) {
     return <Text>Failed to fetch data</Text>;
   }
-
+  
   const exercise = data.exercises[0];
-
   if (!exercise) {
     return <Text>Exercise Not Found !</Text>;
   }
@@ -66,7 +66,9 @@ export default function ExerciseDetailsScreen() {
         >
           {isInstructionExpanded ? "See less" : "See more"}
         </Text>
+
       </View>
+        <NewSetInput/>
     </ScrollView>
   );
 }

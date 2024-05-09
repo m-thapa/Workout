@@ -7,15 +7,16 @@ import {
   ActivityIndicator,
 } from "react-native";
 import ExerciseListItem from "../components/ExerciseListItem";
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useIsFetching } from "@tanstack/react-query";
 import { gql } from "graphql-request";
 import client from "../graphqlClient";
 import { Redirect } from "expo-router";
 import { useAuth } from "../providers/AuthContext";
+import { Button } from "react-native";
 
 const exercisesQuery = gql`
-  query exercises($muscle: String, $name: String) {
-    exercises(muscle: $muscle, name: $name) {
+  query exercises($muscle: String, $name: String, $offset: Int) {
+    exercises(muscle: $muscle, name: $name, offset: $offset) {
       name
       muscle
       equipment
@@ -24,33 +25,46 @@ const exercisesQuery = gql`
 `;
 
 export default function ExercisesScreen() {
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error, fetchNextPage } = useInfiniteQuery({
     queryKey: ["exercises"],
-    queryFn: async () => {
-      return client.request(exercisesQuery);
-    },
+    queryFn: ({ pageParam }) =>
+      client.request(exercisesQuery, { offset: pageParam }),
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, pages) => pages.length * 10,
   });
 
   const { username } = useAuth();
 
+  const loadMore = () => {
+    if (useIsFetchingNextPage) {
+      return;
+    }
+    fetchNextPage();
+  };
+
   if (isLoading) {
     return <ActivityIndicator />;
   }
-
   if (error) {
     return <Text>Failed to fetch exercises</Text>;
   }
   if (!username) {
     return <Redirect href={"/auth"}></Redirect>;
   }
+
+  const exercises = data?.pages.flatMap((page) => page.exercises);
+
   return (
     <View style={styles.container}>
       <FlatList
-        data={data.exercises}
+        data={exercises}
         contentContainerStyle={{ gap: 5 }}
         keyExtractor={(item, index) => item.name + index}
         renderItem={({ item }) => <ExerciseListItem item={item} />}
+        onEndReachedThreshold={1}
+        onEndReached={loadMore}
       />
+
       <StatusBar style="auto" />
     </View>
   );

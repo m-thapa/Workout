@@ -7,12 +7,12 @@ import {
   ActivityIndicator,
 } from "react-native";
 import ExerciseListItem from "../components/ExerciseListItem";
-import { useInfiniteQuery, useIsFetching } from "@tanstack/react-query";
+import { useInfiniteQuery, isFetchingNextPage } from "@tanstack/react-query";
 import { gql } from "graphql-request";
 import client from "../graphqlClient";
 import { Redirect } from "expo-router";
 import { useAuth } from "../providers/AuthContext";
-import { Button } from "react-native";
+
 
 const exercisesQuery = gql`
   query exercises($muscle: String, $name: String, $offset: Int) {
@@ -36,9 +36,10 @@ export default function ExercisesScreen() {
   const { username } = useAuth();
 
   const loadMore = () => {
-    if (useIsFetchingNextPage) {
+    if (isFetchingNextPage) {
       return;
     }
+
     fetchNextPage();
   };
 
